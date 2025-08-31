@@ -6,7 +6,7 @@
     <title>Aether Server - World Archive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Your CSS styles here (unchanged from previous implementation) */
+        
         :root {
             --primary: #4CAF50;
             --primary-dark: #388E3C;
@@ -477,7 +477,7 @@
                     <label for="season-filter">Filter by Season</label>
                     <select id="season-filter">
                         <option value="all">All Seasons</option>
-                        <!-- Seasons will be populated by JavaScript -->
+                        
                     </select>
                 </div>
                 
@@ -504,7 +504,7 @@
         </div>
         
         <footer>
-            <p>&copy; 2023 Terraria Server World Archive | Created for our amazing community</p>
+            <p>&copy; 2025 Aether's World Archive | Created for our amazing community</p>
         </footer>
     </div>
 
@@ -570,7 +570,7 @@
                     <div class="form-group">
                         <label for="world-season">Season</label>
                         <select id="world-season" required>
-                            <!-- Seasons will be populated by JavaScript -->
+                            
                         </select>
                     </div>
                     
@@ -618,7 +618,7 @@
                     <div class="form-group">
                         <label for="edit-world-season">Season</label>
                         <select id="edit-world-season" required>
-                            <!-- Seasons will be populated by JavaScript -->
+                            
                         </select>
                     </div>
                     
@@ -658,19 +658,19 @@
     </div>
 
     <script>
-        // JSONBin.io configuration - UPDATE THESE VALUES WITH YOUR OWN
-        const JSONBIN_BIN_ID = '68b3a744d0ea881f406c8d47'; // Replace with your actual Bin ID
-        const JSONBIN_API_KEY = '$2a$10$tJEMTepocVWvoeX88Hz2MO7cqhu6xs6KQFH/9QOxYjDnHs3O55eYO'; // Replace with your actual API key
+        // Pls don't use these they keep the site running and sadly i can't hide them also if you wanna use this code you can but replace JSONBIN_BIN_ID and JSONBIN_API_KEY with your own credentials
+        const JSONBIN_BIN_ID = '68b3a744d0ea881f406c8d47'; 
+        const JSONBIN_API_KEY = '$2a$10$tJEMTepocVWvoeX88Hz2MO7cqhu6xs6KQFH/9QOxYjDnHs3O55eYO';
         const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
         
-        // Admin password
+        // PLS DON'T USE THIS IF YOUR NOT A ADMIN thank you <3 (change this if your going to be using the code)
         const ADMIN_PASSWORD = "32145787893272731dansserver";
         
-        // Initialize data structure
+        
         let seasons = [];
         let worlds = [];
         
-        // Show notification
+        
         function showNotification(message, isError = false) {
             const notification = document.createElement('div');
             notification.className = 'notification';
@@ -687,7 +687,7 @@
             }, 3000);
         }
         
-        // Fetch data from JSONBin.io
+        
         async function fetchData() {
             try {
                 const response = await fetch(JSONBIN_URL, {
@@ -704,7 +704,7 @@
                 seasons = data.record.seasons || [];
                 worlds = data.record.worlds || [];
                 
-                // If no data exists, initialize with sample data
+                
                 if (seasons.length === 0) {
                     seasons = [
                         { id: 1, name: "Season 1: The Beginning" },
@@ -734,7 +734,7 @@
                 console.error('Error fetching data:', error);
                 showNotification('Error loading data. Using local storage instead.', true);
                 
-                // Fallback to localStorage
+                
                 seasons = JSON.parse(localStorage.getItem('terrariaSeasons')) || [];
                 worlds = JSON.parse(localStorage.getItem('terrariaWorlds')) || [];
                 
@@ -743,7 +743,7 @@
             }
         }
         
-        // Save data to JSONBin.io
+        
         async function saveData() {
             const dataToSave = {
                 seasons,
@@ -764,7 +764,7 @@
                     throw new Error('Failed to save data');
                 }
                 
-                // Also save to localStorage as backup
+                
                 localStorage.setItem('terrariaSeasons', JSON.stringify(seasons));
                 localStorage.setItem('terrariaWorlds', JSON.stringify(worlds));
                 
@@ -773,13 +773,13 @@
                 console.error('Error saving data:', error);
                 showNotification('Error saving to cloud. Using local storage.', true);
                 
-                // Fallback to localStorage
+                
                 localStorage.setItem('terrariaSeasons', JSON.stringify(seasons));
                 localStorage.setItem('terrariaWorlds', JSON.stringify(worlds));
             }
         }
         
-        // Function to render world cards
+        
         function renderWorlds(worldsArray) {
             const container = document.getElementById('worlds-container');
             container.innerHTML = '';
@@ -823,20 +823,20 @@
             });
         }
         
-        // Function to populate season filter
+        
         function populateSeasonFilter() {
             const filter = document.getElementById('season-filter');
             const worldSeason = document.getElementById('world-season');
             const editWorldSeason = document.getElementById('edit-world-season');
             
-            // Clear existing options except the first one
+            
             while (filter.options.length > 1) {
                 filter.remove(1);
             }
             worldSeason.innerHTML = '';
             editWorldSeason.innerHTML = '';
             
-            // Add seasons to filter
+            
             seasons.forEach(season => {
                 const option = document.createElement('option');
                 option.value = season.id;
@@ -847,7 +847,7 @@
             });
         }
         
-        // Function to filter worlds based on criteria
+        
         function filterWorlds() {
             const seasonValue = document.getElementById('season-filter').value;
             const sizeValue = document.getElementById('size-filter').value;
@@ -855,17 +855,17 @@
             
             let filteredWorlds = worlds;
             
-            // Filter by season
+            
             if (seasonValue !== 'all') {
                 filteredWorlds = filteredWorlds.filter(world => world.season == seasonValue);
             }
             
-            // Filter by size
+            
             if (sizeValue !== 'all') {
                 filteredWorlds = filteredWorlds.filter(world => world.size === sizeValue);
             }
             
-            // Filter by search term
+            
             if (searchValue) {
                 filteredWorlds = filteredWorlds.filter(world => 
                     world.name.toLowerCase().includes(searchValue) || 
@@ -876,7 +876,7 @@
             renderWorlds(filteredWorlds);
         }
         
-        // Admin panel functions
+        
         function showLoginModal() {
             document.getElementById('login-modal').style.display = 'flex';
         }
@@ -897,7 +897,7 @@
         }
         
         function renderAdminContent() {
-            // Render worlds list
+            
             const worldsList = document.getElementById('worlds-list');
             worldsList.innerHTML = '';
             
@@ -924,7 +924,7 @@
                 worldsList.appendChild(item);
             });
             
-            // Render seasons list
+            
             const seasonsList = document.getElementById('seasons-list');
             seasonsList.innerHTML = '';
             
@@ -949,11 +949,11 @@
             const tabs = document.querySelectorAll('.admin-tab');
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // Remove active class from all tabs and sections
+                    
                     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
                     
-                    // Add active class to clicked tab and corresponding section
+                    
                     tab.classList.add('active');
                     document.getElementById(`section-${tab.dataset.tab}`).classList.add('active');
                 });
@@ -1027,7 +1027,7 @@
         function editWorld(id) {
             const world = worlds.find(w => w.id === id);
             if (world) {
-                // Populate edit form
+                
                 document.getElementById('edit-world-id').value = world.id;
                 document.getElementById('edit-world-name').textContent = world.name;
                 document.getElementById('edit-world-name-input').value = world.name;
@@ -1037,7 +1037,7 @@
                 document.getElementById('edit-world-file').value = world.file;
                 document.getElementById('edit-world-image-url').value = world.image;
                 
-                // Show edit section
+                
                 document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
                 document.getElementById('section-edit-world').classList.add('active');
@@ -1091,17 +1091,17 @@
             }
         }
         
-        // Initialize the page
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Initial data load
+            
             fetchData();
             
-            // Add event listeners to filters
+            
             document.getElementById('season-filter').addEventListener('change', filterWorlds);
             document.getElementById('size-filter').addEventListener('change', filterWorlds);
             document.getElementById('search').addEventListener('input', filterWorlds);
             
-            // Admin panel setup
+            
             document.getElementById('admin-toggle').addEventListener('click', toggleAdminPanel);
             document.getElementById('admin-close').addEventListener('click', toggleAdminPanel);
             document.getElementById('add-season-btn').addEventListener('click', addNewSeason);
@@ -1121,7 +1121,7 @@
             setupEditWorldForm();
         });
         
-        // Make functions available globally for onclick attributes
+        
         window.editWorld = editWorld;
         window.deleteWorld = deleteWorld;
         window.deleteSeason = deleteSeason;

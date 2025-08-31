@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether Server - World Archive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Your CSS styles here (unchanged from previous implementation) */
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #795548;
+            --accent: #FF9800;
+            --dark: #2C3E50;
+            --light: #ECF0F1;
+            --gray: #95A5A6;
+            --admin: #9C27B0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-attachment: fixed;
+            color: var(--light);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(44, 62, 80, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .admin-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--admin);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .admin-toggle:hover {
+            background-color: #7B1FA2;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .filters {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+            font-size: 16px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            color: var(--gray);
+        }
+        
+        .worlds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .world-card {
+            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .world-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .world-image {
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        .world-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .world-card:hover .world-image img {
+            transform: scale(1.05);
+        }
+        
+        .world-details {
+            padding: 20px;
+        }
+        
+        .world-details h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .world-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .world-desc {
+            margin-bottom: 20px;
+            font-size: 15px;
+            height: 60px;
+            overflow: hidden;
+        }
+        
+        .download-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: linear-gradient(to right, var(--primary-dark), var(--primary));
+        }
+        
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: var(--gray);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.3);
+            margin-top: 40px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        /* Admin Panel Styles */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .admin-content {
+            background-color: var(--dark);
+            max-width: 1000px;
+            margin: 40px auto;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-tab {
+            padding: 10px 20px;
+            background-color: var(--secondary);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .admin-tab.active {
+            background-color: var(--admin);
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-danger {
+            background-color: #F44336;
+        }
+        
+        .btn-danger:hover {
+            background-color: #D32F2F;
+        }
+        
+        .admin-list {
+            margin-top: 20px;
+        }
+        
+        .admin-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-item-content {
+            flex: 1;
+            max-width: 70%;
+        }
+        
+        .admin-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-form {
+            background-color: var(--dark);
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 20px;
+            border: 2px dashed var(--gray);
+            border-radius: 8px;
+        }
+        
+        .file-upload img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 5px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 3000;
+            transition: opacity 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .worlds-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .admin-content {
+                padding: 20px;
+                margin: 20px auto;
+            }
+            
+            .admin-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .admin-item-actions {
+                align-self: flex-end;
+            }
+            
+            .admin-item-content {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-globe-americas"></i>
+            </div>
+            <h1>Aether's World Archive</h1>
+            <p class="subtitle">Download previous season world files and relive the memories!</p>
+            <button class="admin-toggle" id="admin-toggle">
+                <i class="fas fa-cog"></i> Admin Panel
+            </button>
+        </header>
+        
+        <div class="content">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="season-filter">Filter by Season</label>
+                    <select id="season-filter">
+                        <option value="all">All Seasons</option>
+                        <!-- Seasons will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="size-filter">World Size</label>
+                    <select id="size-filter">
+                        <option value="all">All Sizes</option>
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group search-box">
+                    <label for="search">Search Worlds</label>
+                    <input type="text" id="search" placeholder="Enter world name...">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            
+            <div class="worlds-grid" id="worlds-container">
+                <!-- World cards will be generated here -->
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2023 Terraria Server World Archive | Created for our amazing community</p>
+        </footer>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="login-modal" id="login-modal">
+        <div class="login-form">
+            <h2>Admin Login</h2>
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter admin password">
+            </div>
+            <button class="btn btn-primary" id="login-btn">Login</button>
+            <p id="login-error" style="color: #F44336; margin-top: 15px; display: none;">Incorrect password</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="admin-panel">
+        <div class="admin-content">
+            <div class="admin-header">
+                <h2>Admin Panel</h2>
+                <button class="btn btn-danger" id="admin-close">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+            
+            <div class="admin-tabs">
+                <div class="admin-tab active" data-tab="worlds">Manage Worlds</div>
+                <div class="admin-tab" data-tab="seasons">Manage Seasons</div>
+                <div class="admin-tab" data-tab="add-world">Add New World</div>
+            </div>
+            
+            <!-- Manage Worlds Section -->
+            <div class="admin-section active" id="section-worlds">
+                <h3>Manage Worlds</h3>
+                <div class="admin-list" id="worlds-list">
+                    <!-- Worlds will be listed here -->
+                </div>
+            </div>
+            
+            <!-- Manage Seasons Section -->
+            <div class="admin-section" id="section-seasons">
+                <h3>Manage Seasons</h3>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="add-season-btn">
+                        <i class="fas fa-plus"></i> Add New Season
+                    </button>
+                </div>
+                <div class="admin-list" id="seasons-list">
+                    <!-- Seasons will be listed here -->
+                </div>
+            </div>
+            
+            <!-- Add World Section -->
+            <div class="admin-section" id="section-add-world">
+                <h3>Add New World</h3>
+                <form id="add-world-form">
+                    <div class="form-group">
+                        <label for="world-name">World Name</label>
+                        <input type="text" id="world-name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="world-season">Season</label>
+                        <select id="world-season" required>
+                            <!-- Seasons will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="world-size">World Size</label>
+                        <select id="world-size" required>
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="world-description">Description</label>
+                        <textarea id="world-description" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="world-file">World File URL</label>
+                        <input type="text" id="world-file" required placeholder="Paste direct download link">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="world-image-url">World Image URL</label>
+                        <input type="text" id="world-image-url" required placeholder="Paste image URL">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add World
+                    </button>
+                </form>
+            </div>
+
+            <!-- Edit World Section -->
+            <div class="admin-section" id="section-edit-world">
+                <h3>Edit World: <span id="edit-world-name"></span></h3>
+                <form id="edit-world-form">
+                    <input type="hidden" id="edit-world-id">
+                    
+                    <div class="form-group">
+                        <label for="edit-world-name">World Name</label>
+                        <input type="text" id="edit-world-name-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-world-season">Season</label>
+                        <select id="edit-world-season" required>
+                            <!-- Seasons will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-world-size">World Size</label>
+                        <select id="edit-world-size" required>
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-world-description">Description</label>
+                        <textarea id="edit-world-description" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-world-file">World File URL</label>
+                        <input type="text" id="edit-world-file" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-world-image-url">World Image URL</label>
+                        <input type="text" id="edit-world-image-url" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button type="button" class="btn btn-danger" id="cancel-edit">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JSONBin.io configuration - UPDATE THESE VALUES WITH YOUR OWN
+        const JSONBIN_BIN_ID = '68b3a744d0ea881f406c8d47'; // Replace with your actual Bin ID
+        const JSONBIN_API_KEY = '$2a$10$tJEMTepocVWvoeX88Hz2MO7cqhu6xs6KQFH/9QOxYjDnHs3O55eYO'; // Replace with your actual API key
+        const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+        
+        // Admin password
+        const ADMIN_PASSWORD = "32145787893272731dansserver";
+        
+        // Initialize data structure
+        let seasons = [];
+        let worlds = [];
+        
+        // Show notification
+        function showNotification(message, isError = false) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notification.style.backgroundColor = isError ? '#F44336' : '#4CAF50';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Fetch data from JSONBin.io
+        async function fetchData() {
+            try {
+                const response = await fetch(JSONBIN_URL, {
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                const data = await response.json();
+                seasons = data.record.seasons || [];
+                worlds = data.record.worlds || [];
+                
+                // If no data exists, initialize with sample data
+                if (seasons.length === 0) {
+                    seasons = [
+                        { id: 1, name: "Season 1: The Beginning" },
+                        { id: 2, name: "Season 2: Age of Exploration" },
+                        { id: 3, name: "Season 3: Hardmode Awakening" }
+                    ];
+                }
+                
+                if (worlds.length === 0) {
+                    worlds = [
+                        {
+                            id: 1,
+                            name: "Eternia",
+                            season: 1,
+                            size: "medium",
+                            description: "Our first world where we defeated the Wall of Flesh for the first time.",
+                            date: "2021-03-15",
+                            image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80",
+                            file: "#"
+                        }
+                    ];
+                }
+                
+                renderWorlds(worlds);
+                populateSeasonFilter();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showNotification('Error loading data. Using local storage instead.', true);
+                
+                // Fallback to localStorage
+                seasons = JSON.parse(localStorage.getItem('terrariaSeasons')) || [];
+                worlds = JSON.parse(localStorage.getItem('terrariaWorlds')) || [];
+                
+                renderWorlds(worlds);
+                populateSeasonFilter();
+            }
+        }
+        
+        // Save data to JSONBin.io
+        async function saveData() {
+            const dataToSave = {
+                seasons,
+                worlds
+            };
+            
+            try {
+                const response = await fetch(JSONBIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(dataToSave)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to save data');
+                }
+                
+                // Also save to localStorage as backup
+                localStorage.setItem('terrariaSeasons', JSON.stringify(seasons));
+                localStorage.setItem('terrariaWorlds', JSON.stringify(worlds));
+                
+                showNotification('Data saved successfully!');
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showNotification('Error saving to cloud. Using local storage.', true);
+                
+                // Fallback to localStorage
+                localStorage.setItem('terrariaSeasons', JSON.stringify(seasons));
+                localStorage.setItem('terrariaWorlds', JSON.stringify(worlds));
+            }
+        }
+        
+        // Function to render world cards
+        function renderWorlds(worldsArray) {
+            const container = document.getElementById('worlds-container');
+            container.innerHTML = '';
+            
+            if (worldsArray.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search fa-3x"></i>
+                        <p>No worlds found matching your criteria</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            worldsArray.forEach(world => {
+                const season = seasons.find(s => s.id === world.season);
+                const seasonName = season ? season.name : `Season ${world.season}`;
+                
+                const card = document.createElement('div');
+                card.className = 'world-card';
+                card.innerHTML = `
+                    <div class="world-image">
+                        <img src="${world.image}" alt="${world.name}">
+                    </div>
+                    <div class="world-details">
+                        <h3>${world.name}</h3>
+                        <div class="world-meta">
+                            <span>${seasonName}</span>
+                            <span>${world.size.toUpperCase()}</span>
+                        </div>
+                        <p class="world-desc">${world.description}</p>
+                        <div class="world-meta">
+                            <span>${new Date(world.date).toLocaleDateString()}</span>
+                        </div>
+                        <a href="${world.file}" class="download-btn" data-id="${world.id}">
+                            <i class="fas fa-download"></i> Download World File
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Function to populate season filter
+        function populateSeasonFilter() {
+            const filter = document.getElementById('season-filter');
+            const worldSeason = document.getElementById('world-season');
+            const editWorldSeason = document.getElementById('edit-world-season');
+            
+            // Clear existing options except the first one
+            while (filter.options.length > 1) {
+                filter.remove(1);
+            }
+            worldSeason.innerHTML = '';
+            editWorldSeason.innerHTML = '';
+            
+            // Add seasons to filter
+            seasons.forEach(season => {
+                const option = document.createElement('option');
+                option.value = season.id;
+                option.textContent = season.name;
+                filter.appendChild(option.cloneNode(true));
+                worldSeason.appendChild(option.cloneNode(true));
+                editWorldSeason.appendChild(option.cloneNode(true));
+            });
+        }
+        
+        // Function to filter worlds based on criteria
+        function filterWorlds() {
+            const seasonValue = document.getElementById('season-filter').value;
+            const sizeValue = document.getElementById('size-filter').value;
+            const searchValue = document.getElementById('search').value.toLowerCase();
+            
+            let filteredWorlds = worlds;
+            
+            // Filter by season
+            if (seasonValue !== 'all') {
+                filteredWorlds = filteredWorlds.filter(world => world.season == seasonValue);
+            }
+            
+            // Filter by size
+            if (sizeValue !== 'all') {
+                filteredWorlds = filteredWorlds.filter(world => world.size === sizeValue);
+            }
+            
+            // Filter by search term
+            if (searchValue) {
+                filteredWorlds = filteredWorlds.filter(world => 
+                    world.name.toLowerCase().includes(searchValue) || 
+                    world.description.toLowerCase().includes(searchValue)
+                );
+            }
+            
+            renderWorlds(filteredWorlds);
+        }
+        
+        // Admin panel functions
+        function showLoginModal() {
+            document.getElementById('login-modal').style.display = 'flex';
+        }
+        
+        function hideLoginModal() {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('login-error').style.display = 'none';
+        }
+        
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                showLoginModal();
+            }
+        }
+        
+        function renderAdminContent() {
+            // Render worlds list
+            const worldsList = document.getElementById('worlds-list');
+            worldsList.innerHTML = '';
+            
+            worlds.forEach(world => {
+                const season = seasons.find(s => s.id === world.season);
+                const seasonName = season ? season.name : `Season ${world.season}`;
+                
+                const item = document.createElement('div');
+                item.className = 'admin-item';
+                item.innerHTML = `
+                    <div class="admin-item-content">
+                        <h4>${world.name}</h4>
+                        <p>${seasonName} | ${world.size}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <button class="btn btn-primary" onclick="editWorld(${world.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteWorld(${world.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                worldsList.appendChild(item);
+            });
+            
+            // Render seasons list
+            const seasonsList = document.getElementById('seasons-list');
+            seasonsList.innerHTML = '';
+            
+            seasons.forEach(season => {
+                const item = document.createElement('div');
+                item.className = 'admin-item';
+                item.innerHTML = `
+                    <div class="admin-item-content">
+                        <input type="text" value="${season.name}" onchange="updateSeasonName(${season.id}, this.value)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid #95A5A6; padding: 8px; border-radius: 4px; width: 100%;">
+                    </div>
+                    <div class="admin-item-actions">
+                        <button class="btn btn-danger" onclick="deleteSeason(${season.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                seasonsList.appendChild(item);
+            });
+        }
+        
+        function setupAdminTabs() {
+            const tabs = document.querySelectorAll('.admin-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and sections
+                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding section
+                    tab.classList.add('active');
+                    document.getElementById(`section-${tab.dataset.tab}`).classList.add('active');
+                });
+            });
+        }
+        
+        function setupAddWorldForm() {
+            document.getElementById('add-world-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const newWorld = {
+                    id: worlds.length > 0 ? Math.max(...worlds.map(w => w.id)) + 1 : 1,
+                    name: document.getElementById('world-name').value,
+                    season: parseInt(document.getElementById('world-season').value),
+                    size: document.getElementById('world-size').value,
+                    description: document.getElementById('world-description').value,
+                    date: new Date().toISOString().split('T')[0],
+                    image: document.getElementById('world-image-url').value,
+                    file: document.getElementById('world-file').value
+                };
+                
+                worlds.push(newWorld);
+                saveData();
+                renderWorlds(worlds);
+                renderAdminContent();
+                document.getElementById('add-world-form').reset();
+                
+                showNotification('World added successfully!');
+            });
+        }
+        
+        function addNewSeason() {
+            const newSeasonId = seasons.length > 0 ? Math.max(...seasons.map(s => s.id)) + 1 : 1;
+            const newSeasonName = prompt('Enter the name for the new season:');
+            
+            if (newSeasonName) {
+                seasons.push({
+                    id: newSeasonId,
+                    name: newSeasonName
+                });
+                
+                saveData();
+                populateSeasonFilter();
+                renderAdminContent();
+                showNotification('Season added successfully!');
+            }
+        }
+        
+        function updateSeasonName(id, newName) {
+            const season = seasons.find(s => s.id === id);
+            if (season && newName.trim() !== '') {
+                season.name = newName;
+                saveData();
+                populateSeasonFilter();
+                filterWorlds();
+                showNotification('Season updated successfully!');
+            }
+        }
+        
+        function deleteSeason(id) {
+            if (confirm('Are you sure you want to delete this season? This will not delete associated worlds, but they will show as "Season X".')) {
+                seasons = seasons.filter(s => s.id !== id);
+                saveData();
+                populateSeasonFilter();
+                renderAdminContent();
+                filterWorlds();
+                showNotification('Season deleted successfully!');
+            }
+        }
+        
+        function editWorld(id) {
+            const world = worlds.find(w => w.id === id);
+            if (world) {
+                // Populate edit form
+                document.getElementById('edit-world-id').value = world.id;
+                document.getElementById('edit-world-name').textContent = world.name;
+                document.getElementById('edit-world-name-input').value = world.name;
+                document.getElementById('edit-world-season').value = world.season;
+                document.getElementById('edit-world-size').value = world.size;
+                document.getElementById('edit-world-description').value = world.description;
+                document.getElementById('edit-world-file').value = world.file;
+                document.getElementById('edit-world-image-url').value = world.image;
+                
+                // Show edit section
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                document.getElementById('section-edit-world').classList.add('active');
+            }
+        }
+        
+        function setupEditWorldForm() {
+            document.getElementById('edit-world-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const worldId = parseInt(document.getElementById('edit-world-id').value);
+                const world = worlds.find(w => w.id === worldId);
+                
+                if (world) {
+                    world.name = document.getElementById('edit-world-name-input').value;
+                    world.season = parseInt(document.getElementById('edit-world-season').value);
+                    world.size = document.getElementById('edit-world-size').value;
+                    world.description = document.getElementById('edit-world-description').value;
+                    world.file = document.getElementById('edit-world-file').value;
+                    world.image = document.getElementById('edit-world-image-url').value;
+                    
+                    saveData();
+                    renderWorlds(worlds);
+                    renderAdminContent();
+                    
+                    // Return to worlds list
+                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                    document.getElementById('section-worlds').classList.add('active');
+                    document.querySelector('.admin-tab[data-tab="worlds"]').classList.add('active');
+                    
+                    showNotification('World updated successfully!');
+                }
+            });
+            
+            document.getElementById('cancel-edit').addEventListener('click', function() {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                document.getElementById('section-worlds').classList.add('active');
+                document.querySelector('.admin-tab[data-tab="worlds"]').classList.add('active');
+            });
+        }
+        
+        function deleteWorld(id) {
+            if (confirm('Are you sure you want to delete this world?')) {
+                worlds = worlds.filter(w => w.id !== id);
+                saveData();
+                renderWorlds(worlds);
+                renderAdminContent();
+                showNotification('World deleted successfully!');
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial data load
+            fetchData();
+            
+            // Add event listeners to filters
+            document.getElementById('season-filter').addEventListener('change', filterWorlds);
+            document.getElementById('size-filter').addEventListener('change', filterWorlds);
+            document.getElementById('search').addEventListener('input', filterWorlds);
+            
+            // Admin panel setup
+            document.getElementById('admin-toggle').addEventListener('click', toggleAdminPanel);
+            document.getElementById('admin-close').addEventListener('click', toggleAdminPanel);
+            document.getElementById('add-season-btn').addEventListener('click', addNewSeason);
+            document.getElementById('login-btn').addEventListener('click', function() {
+                const password = document.getElementById('admin-password').value;
+                if (password === ADMIN_PASSWORD) {
+                    hideLoginModal();
+                    document.getElementById('admin-panel').style.display = 'block';
+                    renderAdminContent();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            });
+            
+            setupAdminTabs();
+            setupAddWorldForm();
+            setupEditWorldForm();
+        });
+        
+        // Make functions available globally for onclick attributes
+        window.editWorld = editWorld;
+        window.deleteWorld = deleteWorld;
+        window.deleteSeason = deleteSeason;
+        window.updateSeasonName = updateSeasonName;
+    </script>
+</body>
+</html>
